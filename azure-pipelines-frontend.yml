@@ -4,10 +4,15 @@
 # https://aka.ms/yaml
 
 trigger:
-- master
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - src/frontend/*
+      - azure-pipelines-frontend.yml
 
 pool:
-  name: Azure Pipelines
   demands: npm
   vmImage: 'windows-latest'
 
