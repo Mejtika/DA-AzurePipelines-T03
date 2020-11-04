@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ToDoList.Core;
+using ToDoList.EntityFramework;
 using ToDoList.Storage.Fake;
 using ToDoList.WebApi.Controllers;
 
@@ -27,12 +29,19 @@ namespace ToDoList.WebApi
             services.AddTransient<ListItemCreator, ListItemCreator>();
             services.AddTransient<ListItemChecker, ListItemChecker>();
 
+            var connectionString = Configuration.GetConnectionString("ToDoListDatabase");
+            services.AddDbContext<ToDoListContext>(options =>
+                options.UseSqlServer(connectionString));
 
-            var fakeStorage = new FakeStorage();
-            services.AddSingleton<IListItemStorageSaver, FakeStorage>((serviceCollection) => fakeStorage);
-            services.AddSingleton<IListItemStorageReader, FakeStorage>((serviceCollection) => fakeStorage);
-            services.AddSingleton<IListItemStorageChanger, FakeStorage>((serviceCollection) => fakeStorage);
-            
+            services.AddTransient<IListItemStorageSaver, DbStorage>();
+            services.AddTransient<IListItemStorageReader, DbStorage>();
+            services.AddTransient<IListItemStorageChanger, DbStorage>();
+
+            // var fakeStorage = new FakeStorage();
+            // services.AddSingleton<IListItemStorageSaver, FakeStorage>((serviceCollection) => fakeStorage);
+            // services.AddSingleton<IListItemStorageReader, FakeStorage>((serviceCollection) => fakeStorage);
+            // services.AddSingleton<IListItemStorageChanger, FakeStorage>((serviceCollection) => fakeStorage);
+
             services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
             {
                 builder.AllowAnyOrigin()
@@ -43,8 +52,10 @@ namespace ToDoList.WebApi
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ToDoListContext context)
         {
+            // context.Database.Migrate();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -58,7 +69,6 @@ namespace ToDoList.WebApi
             app.UseCors("MyPolicy");
 
             app.UseMvc();
-            
 
         }
     }
