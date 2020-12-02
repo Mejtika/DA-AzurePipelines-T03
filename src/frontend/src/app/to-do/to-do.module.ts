@@ -7,7 +7,6 @@ import { ToDoItemsDataSourceFakeService } from './to-do-items-data-source-fake.s
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ToDoItemsDataSourceRealService } from './to-do-items-data-source-real.service';
-import { CurrentToDoItemsDataSourceService } from 'src/environments/environment';
 import { ToDoItemsDataSourceServiceFactory } from './to-do-items-data-source.service.factory';
 import { EnvConfigService } from '../env-config.service';
 
