@@ -3,15 +3,6 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
-trigger:
-  branches:
-    include:
-      - master
-  paths:
-    include:
-      - src/frontend/*
-      - azure-pipelines-frontend.yml
-
 pool:
   demands: npm
   vmImage: 'windows-latest'
