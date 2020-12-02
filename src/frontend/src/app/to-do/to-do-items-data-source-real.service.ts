@@ -29,12 +29,19 @@ export class ToDoItemsDataSourceRealService
     //   this.items.next(x);
     // });
     // return this.items.asObservable();
-    this._envConfigService
-      .getApiUrl$()
-      .pipe(switchMap((x) => this.httpClient.get(`${x}/api/listitems`)))
-      .subscribe((data: ToDoItem[]) => {
-        this.items.next(data);
-      });
+    //--------------------------------------------------------------
+    // this._envConfigService
+    //   .getApiUrl$()
+    //   .pipe(switchMap((x) => this.httpClient.get(`${x}/api/listitems`)))
+    //   .subscribe((data: ToDoItem[]) => {
+    //     this.items.next(data);
+    //   });
+    // return this.items.asObservable();
+    //--------------------------------------------------------------
+    const url = this._envConfigService.getConfig().apiUrl + "/api/listitems";
+    this.httpClient.get(url).subscribe((data: ToDoItem[]) => {
+      this.items.next(data);
+    });
 
     return this.items.asObservable();
   }
@@ -54,21 +61,31 @@ export class ToDoItemsDataSourceRealService
     //   }
     // );
 
-    this._envConfigService
-      .getApiUrl$()
-      .pipe(
-        switchMap((x) =>
-          this.httpClient.post(`${x}/api/listitems`, { name: itemName })
-        )
-      )
-      .subscribe(
-        (x: ToDoItem) => {
-          newItem.id = x.id;
-        },
-        (error) => {
-          this.removeItem(newItem);
-        }
-      );
+    // this._envConfigService
+    //   .getApiUrl$()
+    //   .pipe(
+    //     switchMap((x) =>
+    //       this.httpClient.post(`${x}/api/listitems`, { name: itemName })
+    //     )
+    //   )
+    //   .subscribe(
+    //     (x: ToDoItem) => {
+    //       newItem.id = x.id;
+    //     },
+    //     (error) => {
+    //       this.removeItem(newItem);
+    //     }
+    //   );
+
+    const url = this._envConfigService.getConfig().apiUrl + "/api/listitems";
+    this.httpClient.post(url, { name: itemName }).subscribe(
+      (x: ToDoItem) => {
+        newItem.id = x.id;
+      },
+      (error) => {
+        this.removeItem(newItem);
+      }
+    );
   }
 
   private addItemToList(newItem: ToDoItem) {
@@ -91,21 +108,30 @@ export class ToDoItemsDataSourceRealService
       //   }
       // );
 
-      this._envConfigService
-        .getApiUrl$()
-        .pipe(
-          switchMap((x) =>
-            this.httpClient.put(`${x}/api/listitems/${toDoItem.id}/check`, {})
-          )
-        )
-        .subscribe(
-          (x: ToDoItem) => {
-            debugger;
-          },
-          (error) => {
+      // this._envConfigService
+      //   .getApiUrl$()
+      //   .pipe(
+      //     switchMap((x) =>
+      //       this.httpClient.put(`${x}/api/listitems/${toDoItem.id}/check`, {})
+      //     )
+      //   )
+      //   .subscribe(
+      //     (x: ToDoItem) => {
+      //       debugger;
+      //     },
+      //     (error) => {
+      //       this.addItemToList(toDoItem);
+      //     }
+      //   );
+      
+      const putUrl = this._envConfigService.getConfig().apiUrl + "/api/listitems/" + toDoItem.id + "/check"
+      this.httpClient.put(putUrl, {})
+        .subscribe((x: ToDoItem) => {
+        },
+          error => {
             this.addItemToList(toDoItem);
-          }
-        );
+          });
+
     }
   }
 
