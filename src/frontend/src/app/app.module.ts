@@ -15,7 +15,7 @@ import { EnvConfigService } from './env-config.service';
     AppRoutingModule,
     ToDoModule
   ],
-  providers: [],
+  providers: [EnvConfigService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
