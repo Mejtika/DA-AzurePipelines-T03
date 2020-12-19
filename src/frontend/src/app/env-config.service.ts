@@ -24,12 +24,15 @@ export class EnvConfigService {
     private getData() {
         this.httpClient.get("env.json").subscribe((data: EnvConfig) => {
             this.parseBooleans(data);
+            console.log(`GetData - url = ${data.apiUrl}`)
+            console.log(`GetData - realStorage = ${data.isRealStorageEnabled}`)
             this.config = data;
             this.isConfigReadySubject$.next(true);
         });
     }
 
     private parseBooleans(data: EnvConfig) {
+        console.log(`Env-config serivce ${this.parseBoolean(data.isRealStorageEnabled)}`);
         data.isRealStorageEnabled = this.parseBoolean(data.isRealStorageEnabled)
     }
 
