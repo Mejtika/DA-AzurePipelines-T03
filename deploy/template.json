@@ -1,0 +1,215 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sites_DA_Szkolenie_back_name": {
+            "defaultValue": "DA-Szkolenie-back",
+            "type": "String"
+        },
+        "sites_DA_Szkolenie_front_name": {
+            "defaultValue": "DA-Szkolenie-front",
+            "type": "String"
+        },
+        "servers_da_szkolenie_server_name": {
+            "defaultValue": "da-szkolenie-server",
+            "type": "String"
+        },
+        "database_name": {
+            "defaultValue": "da-database",
+            "type": "String"
+        },
+        "serverfarms_ASP_DASzkolenie_b8b6_name": {
+            "defaultValue": "ASP-DASzkolenie-b8b6",
+            "type": "String"
+        },
+        "components_DA_Szkolenie_App_Insight_name": {
+            "defaultValue": "DA-Szkolenie-App-Insight",
+            "type": "String"
+        },
+        "alertrules_Failure_Anomalies___DA_Szkolenie_App_Insight_name": {
+            "defaultValue": "Failure Anomalies - DA-Szkolenie-App-Insight",
+            "type": "String"
+        },
+        "servers_da_szkolenie_server_password" :{
+            "defaultValue": null,
+            "type": "string"
+        }
+        
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "microsoft.insights/components",
+            "apiVersion": "2015-05-01",
+            "name": "[parameters('components_DA_Szkolenie_App_Insight_name')]",
+            "location": "westeurope",
+            "kind": "web",
+            "properties": {
+                "Application_Type": "web",
+                "Request_Source": "IbizaWebAppExtensionCreate"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers",
+            "apiVersion": "2015-05-01-preview",
+            "name": "[parameters('servers_da_szkolenie_server_name')]",
+            "location": "westeurope",
+            "kind": "v12.0",
+            "properties": {
+                "administratorLogin": "[parameters('servers_da_szkolenie_server_name')]",
+                "administratorLoginPassword": "[parameters('servers_da_szkolenie_server_password')]",
+                "version": "12.0"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/firewallRules",
+            "apiVersion": "2015-05-01-preview",
+            "name": "[concat(parameters('servers_da_szkolenie_server_name'), '/AllowAllWindowsAzureIps')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_da_szkolenie_server_name'))]"
+            ],
+            "properties": {
+                "startIpAddress": "0.0.0.0",
+                "endIpAddress": "0.0.0.0"
+            }
+        },
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2016-09-01",
+            "name": "[parameters('serverfarms_ASP_DASzkolenie_b8b6_name')]",
+            "location": "West Europe",
+            "sku": {
+                "name": "F1",
+                "tier": "Free",
+                "size": "F1",
+                "family": "F",
+                "capacity": 0
+            },
+            "kind": "app",
+            "properties": {
+                "name": "[parameters('serverfarms_ASP_DASzkolenie_b8b6_name')]",
+                "perSiteScaling": false,
+                "reserved": false,
+                "targetWorkerCount": 0,
+                "targetWorkerSizeId": 0
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases",
+            "apiVersion": "2017-03-01-preview",
+            "name": "[concat(parameters('servers_da_szkolenie_server_name'),'/' ,parameters('database_name'))]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_da_szkolenie_server_name'))]"
+            ],
+            "sku": {
+                "name": "Basic",
+                "tier": "Basic"
+            },
+            "kind": "v12.0,user",
+            "properties": {
+                "collation": "SQL_Latin1_General_CP1_CI_AS",
+                "maxSizeBytes": 104857600,
+                "catalogCollation": "SQL_Latin1_General_CP1_CI_AS",
+                "zoneRedundant": false
+            }
+        },
+        
+       
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2016-08-01",
+            "name": "[parameters('sites_DA_Szkolenie_back_name')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_ASP_DASzkolenie_b8b6_name'))]"
+            ],
+            "kind": "app",
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "[concat(parameters('sites_DA_Szkolenie_back_name'), '.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "[concat(parameters('sites_DA_Szkolenie_back_name'), '.scm.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_ASP_DASzkolenie_b8b6_name'))]",
+                "reserved": false,
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": true,
+                "clientCertEnabled": false,
+                "hostNamesDisabled": false,
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2016-08-01",
+            "name": "[parameters('sites_DA_Szkolenie_front_name')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_ASP_DASzkolenie_b8b6_name'))]"
+            ],
+            "kind": "app",
+            "properties": {
+                "enabled": true,
+                 "hostNameSslStates": [
+                    {
+                        "name": "[concat(parameters('sites_DA_Szkolenie_front_name'), '.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "[concat(parameters('sites_DA_Szkolenie_front_name'), '.scm.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_ASP_DASzkolenie_b8b6_name'))]",
+                "reserved": false,
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": true,
+                "clientCertEnabled": false,
+                "hostNamesDisabled": false,
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": false
+            }
+        },
+       
+        {
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_DA_Szkolenie_back_name'), '/', parameters('sites_DA_Szkolenie_back_name'), '.azurewebsites.net')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_DA_Szkolenie_back_name'))]"
+            ],
+            "properties": {
+                "siteName": "[parameters('sites_DA_Szkolenie_back_name')]",
+                "hostNameType": "Verified"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_DA_Szkolenie_front_name'), '/', parameters('sites_DA_Szkolenie_front_name'), '.azurewebsites.net')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_DA_Szkolenie_front_name'))]"
+            ],
+            "properties": {
+                "siteName": "[parameters('sites_DA_Szkolenie_front_name')]",
+                "hostNameType": "Verified"
+            }
+        }
+    ]
+}
