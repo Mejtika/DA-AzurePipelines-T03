@@ -6,14 +6,13 @@
 trigger:
   branches:
     include:
-      - master
+    - master
   paths:
     include:
-      - src/backend/*
-      - azure-pipelines-backend.yml
+    - src/backend/*
 
 pool:
-  vmImage: 'windows-latest'
+  name: Hosted VS2017
 
 steps:
 - task: DotNetCoreCLI@2
@@ -33,24 +32,12 @@ steps:
   inputs:
     command: test
     projects: '**/*.UnitTests.csproj'
-    arguments: '--configuration Release /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura'
-
-- task: Palmmedia.reportgenerator.reportgenerator-build-release-task.reportgenerator@4
-  displayName: ReportGenerator
-  inputs:
-    reports: '**/coverage.cobertura.xml'
-
-- task: PublishCodeCoverageResults@1
-  displayName: 'Publish code coverage from **/coverage.cobertura.xml'
-  inputs:
-    codeCoverageTool: Cobertura
-    summaryFileLocation: '**/coverage.cobertura.xml'
-    reportDirectory: CoverageReport
+    arguments: '--configuration Release --collect "Code coverage"'
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet publish'
   inputs:
     command: publish
     publishWebProjects: false
-    projects: 'src\backend\ToDoList.WebApi\ToDoList.WebApi.csproj'
+    projects: src/backend/ToDoList.WebApi/ToDoList.WebApi.csproj
     arguments: '--configuration Release'

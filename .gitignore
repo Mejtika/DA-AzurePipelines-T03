@@ -1,15 +1,4 @@
 obj/
 bin/
 .idea/
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-.history/*
-.vscode/launch.json
-.vscode/tasks.json
-src/frontend/package-lock.json
-src/frontend/package-lock.json
 junit/

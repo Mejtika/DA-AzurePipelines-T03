@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,7 @@ namespace ToDoList.WebApi
             services.AddTransient<ListItemCreator, ListItemCreator>();
             services.AddTransient<ListItemChecker, ListItemChecker>();
 
+
             var connectionString = Configuration.GetConnectionString("ToDoListDatabase");
             services.AddDbContext<ToDoListContext>(options =>
                 options.UseSqlServer(connectionString));
@@ -37,10 +39,6 @@ namespace ToDoList.WebApi
             services.AddTransient<IListItemStorageReader, DbStorage>();
             services.AddTransient<IListItemStorageChanger, DbStorage>();
 
-            // var fakeStorage = new FakeStorage();
-            // services.AddSingleton<IListItemStorageSaver, FakeStorage>((serviceCollection) => fakeStorage);
-            // services.AddSingleton<IListItemStorageReader, FakeStorage>((serviceCollection) => fakeStorage);
-            // services.AddSingleton<IListItemStorageChanger, FakeStorage>((serviceCollection) => fakeStorage);
 
             services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
             {
@@ -51,11 +49,10 @@ namespace ToDoList.WebApi
 
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ToDoListContext context)
-        {
-            // context.Database.Migrate();
 
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -69,6 +66,7 @@ namespace ToDoList.WebApi
             app.UseCors("MyPolicy");
 
             app.UseMvc();
+
 
         }
     }

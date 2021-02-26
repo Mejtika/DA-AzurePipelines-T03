@@ -2,10 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 
-export interface EnvConfig {
-    apiUrl: string;
-    isRealStorageEnabled: boolean
-}
 @Injectable({
     providedIn: 'root'
 })
@@ -24,15 +20,12 @@ export class EnvConfigService {
     private getData() {
         this.httpClient.get("env.json").subscribe((data: EnvConfig) => {
             this.parseBooleans(data);
-            console.log(`GetData - url = ${data.apiUrl}`)
-            console.log(`GetData - realStorage = ${data.isRealStorageEnabled}`)
             this.config = data;
             this.isConfigReadySubject$.next(true);
         });
     }
 
     private parseBooleans(data: EnvConfig) {
-        console.log(`Env-config serivce ${this.parseBoolean(data.isRealStorageEnabled)}`);
         data.isRealStorageEnabled = this.parseBoolean(data.isRealStorageEnabled)
     }
 
@@ -60,4 +53,9 @@ export class EnvConfigService {
     public isConfigReady$(): Observable<boolean> {
         return this.isConfigReadySubject$.asObservable();
     }
+}
+
+export interface EnvConfig {
+    apiUrl: string;
+    isRealStorageEnabled: boolean
 }
